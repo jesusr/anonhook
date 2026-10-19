@@ -1,6 +1,6 @@
-# llm-shield
+# Anonhook
 
-`llm-shield` is a local privacy wrapper for text sent to language models. It
+`anonhook` is a local privacy wrapper for text sent to language models. It
 replaces configured sensitive terms and regex matches with placeholders such
 as `REDACTED_0`, saves the mapping locally, and can restore those values in a
 model response.
@@ -12,24 +12,29 @@ model response.
 
 ## Install
 
-From a checkout of this repository:
+Install the published NPM package globally:
 
 ```sh
-python -m pip install .
+npm install --global anonhook
 ```
 
-To install an editable development version and test dependencies:
+The package installs a standalone executable for supported platforms, so
+Python does not need to be installed. You can also run commands with `npx`:
 
 ```sh
-python -m pip install -e ".[dev]"
+npx anonhook --help
 ```
+
+For Python development from a checkout, install with `python -m pip install .`.
+The `anonhook` command is the primary CLI; `llm-shield` remains as a Python
+entrypoint alias.
 
 ## Set up a project
 
 From the root of the project whose text you want to scrub, run:
 
 ```sh
-llm-shield init
+anonhook init
 ```
 
 This creates `.llm-shield.yml` and adds `.llm-shield/` to `.gitignore`. Edit
@@ -59,7 +64,7 @@ Use `--config <file-or-directory>` to select a configuration explicitly.
 Scrub a file and write the anonymized text to another file:
 
 ```sh
-llm-shield scrub --input prompt.txt --output prompt.scrubbed.txt
+anonhook scrub --input prompt.txt --output prompt.scrubbed.txt
 ```
 
 The input may instead be literal text, or `-` to read from standard input.
@@ -68,21 +73,21 @@ scrubbed text to stdout. The generated session ID is printed to stderr, so
 stdout remains suitable for piping:
 
 ```sh
-cat prompt.txt | llm-shield scrub > prompt.scrubbed.txt
+cat prompt.txt | anonhook scrub > prompt.scrubbed.txt
 ```
 
 Send only the scrubbed text to the external model. Then restore its response
 using the session ID reported by `scrub`:
 
 ```sh
-llm-shield restore --session <session-id> --input response.txt --output response.restored.txt
+anonhook restore --session <session-id> --input response.txt --output response.restored.txt
 ```
 
 `restore` also accepts stdin and stdout. If `--session` is omitted, it uses the
 latest scrub session:
 
 ```sh
-cat response.txt | llm-shield restore > response.restored.txt
+cat response.txt | anonhook restore > response.restored.txt
 ```
 
 After a successful restore, that session is deleted. Pass the session ID
@@ -94,14 +99,14 @@ Initialize the project configuration and add the sensitive terms and patterns
 first. Then, from the project root, install the hook:
 
 ```sh
-llm-shield init
+anonhook init
 # Edit .llm-shield.yml to configure sensitive terms and patterns.
-llm-shield install claude
+anonhook install claude
 ```
 
 This merges a `PreToolUse` hook for Claude Code's `Read` tool and a `SessionEnd`
 cleanup hook into the project's `.claude/settings.json`. It does not modify
-account-level settings in `~/.claude/`. The `llm-shield` command must be
+account-level settings in `~/.claude/`. The `anonhook` command must be
 installed and available on `PATH` wherever the project hook runs. To target a
 project without changing directories, pass `--project-dir <path>`.
 
@@ -122,7 +127,7 @@ response, so automatic restoration of generated output is not provided.
 in the child command's stdout, and forwards the child's stderr and exit code:
 
 ```sh
-cat prompt.txt | llm-shield wrap -- your-llm-command --stdin
+cat prompt.txt | anonhook wrap -- your-llm-command --stdin
 ```
 
 The command must accept input on stdin and return its response on stdout for

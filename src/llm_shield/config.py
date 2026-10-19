@@ -55,7 +55,7 @@ def find_config(config_path: str | Path | None = None, start_dir: str | Path | N
         candidate = directory / CONFIG_NAME
         if candidate.is_file():
             return candidate
-    raise ConfigError(f"{CONFIG_NAME} not found; run 'llm-shield init' first")
+    raise ConfigError(f"{CONFIG_NAME} not found; run 'anonhook init' first")
 
 
 def load_config(
@@ -150,10 +150,10 @@ def install_claude_hook(directory: str | Path = ".") -> Path:
     registrations = {
         "PreToolUse": {
             "matcher": "Read",
-            "hooks": [{"type": "command", "command": "llm-shield hook claude-pre"}],
+            "hooks": [{"type": "command", "command": "anonhook hook claude-pre"}],
         },
         "SessionEnd": {
-            "hooks": [{"type": "command", "command": "llm-shield hook claude-session-end"}],
+            "hooks": [{"type": "command", "command": "anonhook hook claude-session-end"}],
         },
     }
     for event, registration in registrations.items():

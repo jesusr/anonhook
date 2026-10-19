@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-shield"
+name = "anonhook"
 version = "0.1.0"
 description = "A local privacy wrapper for prompts sent to language models"
 readme = "docs/DISTRIBUTION.md"
@@ -16,6 +16,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
+anonhook = "llm_shield.cli:main"
 llm-shield = "llm_shield.cli:main"
 
 [tool.setuptools.packages.find]

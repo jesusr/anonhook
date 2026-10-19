@@ -31,7 +31,7 @@ def _write_output(value: str, destination: str | None, stdout: TextIO) -> None:
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="llm-shield")
+    parser = argparse.ArgumentParser(prog="anonhook")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init", help="create a default configuration and update .gitignore")
     install = commands.add_parser("install", help="install a project-level application hook")
@@ -63,7 +63,7 @@ def _scrub_command(args: argparse.Namespace, stdin: TextIO, stdout: TextIO, stde
     result = scrub_text(source, config)
     session_id = SessionStore(config.cache_dir).create(result.mapping)
     _write_output(result.text, args.output, stdout)
-    stderr.write(f"llm-shield session: {session_id}\n")
+    stderr.write(f"anonhook session: {session_id}\n")
     return 0
 
 
@@ -94,7 +94,7 @@ def _wrap_command(args: argparse.Namespace, stdin: TextIO, stdout: TextIO, stder
     if completed.returncode == 0:
         store.delete(session_id)
     else:
-        stderr.write(f"llm-shield session retained: {session_id}\n")
+        stderr.write(f"anonhook session retained: {session_id}\n")
     return completed.returncode
 
 
@@ -127,7 +127,7 @@ def main(
             return 0
         return _wrap_command(args, stdin, stdout, stderr)
     except (ConfigError, SessionError, OSError, UnicodeError, ValueError) as error:
-        stderr.write(f"llm-shield: {error}\n")
+        stderr.write(f"anonhook: {error}\n")
         return 1
 
 

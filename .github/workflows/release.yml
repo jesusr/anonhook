@@ -1,0 +1,63 @@
+name: Build and publish release binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: linux-x64
+            executable: anonhook
+            asset: anonhook-linux-x64
+          - runner: macos-15-intel
+            target: darwin-x64
+            executable: anonhook
+            asset: anonhook-darwin-x64
+          - runner: macos-14
+            target: darwin-arm64
+            executable: anonhook
+            asset: anonhook-darwin-arm64
+          - runner: windows-latest
+            target: win32-x64
+            executable: anonhook.exe
+            asset: anonhook-win32-x64.exe
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install . pyinstaller
+      - run: python -m unittest discover -s tests -v
+      - run: pyinstaller --onefile --name anonhook --collect-all yaml --paths src scripts/entrypoint.py
+      - run: python -c "import pathlib, shutil; shutil.copy2(pathlib.Path('dist') / '${{ matrix.executable }}', pathlib.Path('dist') / '${{ matrix.asset }}')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anonhook-${{ matrix.target }}
+          path: dist/${{ matrix.asset }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Verify release version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: python -c "import json, os, pathlib, tomllib; tag = os.environ['TAG_NAME']; expected = 'v' + tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version']; npm = json.loads(pathlib.Path('npm-wrapper/package.json').read_text())['version']; assert tag == expected == 'v' + npm, f'Tag {tag} must match pyproject and NPM versions ({expected}, v{npm})'"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*

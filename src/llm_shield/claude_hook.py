@@ -26,7 +26,7 @@ def _deny(reason: str) -> dict[str, Any]:
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
-            "permissionDecisionReason": f"llm-shield could not anonymize this file: {reason}",
+            "permissionDecisionReason": f"anonhook could not anonymize this file: {reason}",
         }
     }
 
