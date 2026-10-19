@@ -1,14 +1,22 @@
 {
-  "name": "llm-shield",
+  "name": "anonhook",
   "version": "0.1.0",
-  "description": "Privacy wrapper for prompts sent to language models",
+  "description": "Local privacy hooks and prompt anonymization for language models",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jesusr/anonhook.git"
+  },
   "bin": {
-    "llm-shield": "bin/cli.js"
+    "anonhook": "bin/cli.js"
   },
   "files": [
     "bin/cli.js",
-    "vendor/"
+    "bin/install.js",
+    "README.md"
   ],
+  "scripts": {
+    "postinstall": "node bin/install.js"
+  },
   "engines": {
     "node": ">=18"
   }
