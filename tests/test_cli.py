@@ -144,9 +144,10 @@ class CliTests(unittest.TestCase):
         settings_path = self.root / ".claude" / "settings.json"
         settings_path.parent.mkdir()
         settings_path.write_text('{"permissions": {"defaultMode": "acceptEdits"}}', encoding="utf-8")
+        expected_path = settings_path.resolve()
 
-        self.assertEqual(install_claude_hook(self.root), settings_path)
-        self.assertEqual(install_claude_hook(self.root), settings_path)
+        self.assertEqual(install_claude_hook(self.root), expected_path)
+        self.assertEqual(install_claude_hook(self.root), expected_path)
         import json
 
         settings = json.loads(settings_path.read_text(encoding="utf-8"))

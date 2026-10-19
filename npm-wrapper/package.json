@@ -1,6 +1,6 @@
 {
   "name": "anonhook",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local privacy hooks and prompt anonymization for language models",
   "repository": {
     "type": "git",

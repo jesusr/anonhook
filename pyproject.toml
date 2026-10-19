@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anonhook"
-version = "0.1.0"
+version = "0.1.1"
 description = "A local privacy wrapper for prompts sent to language models"
 readme = "docs/DISTRIBUTION.md"
 requires-python = ">=3.9"
