@@ -1,0 +1,93 @@
+Metadata-Version: 2.4
+Name: llm-shield
+Version: 0.1.0
+Summary: A local privacy wrapper for prompts sent to language models
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+
+# Building and distributing llm-shield
+
+## Install from Python source
+
+From the repository root, install the package with `python -m pip install .`.
+For development and tests, use `python -m pip install -e ".[dev]"`. The
+`llm-shield` command is registered as a project script.
+
+## Build standalone binaries
+
+Build separately on each target operating system and architecture; PyInstaller
+does not cross-compile. In a clean environment for each target:
+
+```sh
+python -m pip install .
+python -m pip install pyinstaller
+pyinstaller --onefile --name llm-shield --collect-all yaml \
+  --paths src scripts/entrypoint.py
+```
+
+Smoke-test the resulting `dist/llm-shield` (or `dist/llm-shield.exe`) with
+`init`, `scrub`, and `restore`. Include the PyYAML data and modules in the
+frozen application as shown; keep configuration and session files outside the
+binary so they remain project-local.
+
+## Publish through NPM
+
+`npm-wrapper/` is the companion package scaffold. Build one standalone binary
+per supported target and place it in the matching directory:
+
+```text
+npm-wrapper/
+  package.json
+  bin/cli.js
+  vendor/
+    linux-x64/llm-shield
+    darwin-arm64/llm-shield
+    win32-x64/llm-shield.exe
+```
+
+The wrapper selects the `vendor/<process.platform>-<process.arch>/` executable,
+passes all arguments through unchanged, and inherits standard input, output,
+and error streams. Add only the binaries actually built to the published NPM
+package, test each target, then publish the wrapper directory with `npm
+publish`. The package exposes the `llm-shield` command for both global
+installation and `npx llm-shield`; it does not download executable code at
+runtime. Add target-specific CI builds and release checks before publishing
+additional platform/architecture combinations.
+
+## Session and input notes
+
+Run `llm-shield init` once in the project root, then edit `.llm-shield.yml`.
+Use `llm-shield scrub` to read stdin and write anonymized text to stdout; the
+session ID is reported on stderr. `llm-shield restore --session <id>` restores
+the latest model response and deletes that session after the output is
+successfully written. Omitting `--session` uses the latest scrub session.
+`--input` accepts an existing file path, literal text, or `-` for stdin;
+`--output` accepts a file path or `-` for stdout.
+
+`llm-shield wrap -- command [args...]` sends anonymized stdin to the child
+process and restores its stdout. It forwards the child's stderr and exit code.
+Sessions from failed commands are retained for recovery. Avoid running multiple
+unrelated scrub/restore flows concurrently when relying on the implicit latest
+session; pass the ID explicitly when flows overlap.
+
+Session mappings contain the original sensitive values. The cache directory
+is project-local, is added to `.gitignore` by `init`, and is created with
+owner-only permissions where supported.
+
+## Claude Code project hook
+
+Run `llm-shield install claude` from the project root (or pass
+`--project-dir <path>`) to merge the Read pre-hook and session cleanup hook
+into that project's `.claude/settings.json`. This is project-level
+configuration; it does not edit account-level Claude Code settings. Ensure
+`llm-shield` is installed and available on `PATH` for Claude Code to execute
+the configured command.
+
+The pre-hook redirects Claude Code's `Read` tool to an anonymized snapshot
+instead of modifying the original file. It does not intercept file access
+through Bash, search tools, or other tools, and it cannot rewrite Claude's final
+response. Claude Code hook integration therefore requires a separate workflow
+to restore placeholders in generated output.

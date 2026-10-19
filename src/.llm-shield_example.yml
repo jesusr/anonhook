@@ -1,0 +1,13 @@
+version: "1.0"
+terms:
+  - "Antonio"
+  - "Perico"
+  - "77323214P"
+patterns:
+  - name: "Spanish NIF/NIE"
+    regex: "[0-9]{8}[A-Z]"
+  - name: "API keys"
+    regex: "sk_live_[0-9a-zA-Z]{24}"
+options:
+  placeholder_prefix: "REDACTED_"
+  cache_dir: ".llm-shield"

@@ -1,0 +1,2 @@
+[console_scripts]
+llm-shield = llm_shield.cli:main
